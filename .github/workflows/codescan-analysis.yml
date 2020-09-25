@@ -24,15 +24,12 @@ jobs:
                     key: ${{ runner.os }}-sonar
                     restore-keys: ${{ runner.os }}-sonar
             -   name: Run Analysis
-                uses: codescan-io/codescan-scanner-action@1.0
+                uses: codescan-io/codescan-scanner-action@master
                 with:
                     login: ${{ secrets.CODESCAN_AUTH_TOKEN }}
                     organization: 5efa11fdda6b0c001320f461
                     projectKey: ci1
                     codeScanUrl: https://test.codescan.io
-                    generateSarifFile: true
-                    args: |
-                        sonar.verbose=true
             -   name: Upload SARIF file
                 uses: github/codeql-action/upload-sarif@v1
                 with:
