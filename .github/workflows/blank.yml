@@ -1,0 +1,39 @@
+name: CodeScan
+on: [push]
+
+jobs:
+    CodeScan:
+        runs-on: ubuntu-latest
+        steps:
+            # Checkout code repository to scan
+            -   name: Checkout repository
+                uses: actions/checkout@v2
+                with:
+                    # We must fetch at least the immediate parents so that if this is
+                    # a pull request then we can checkout the head.
+                    fetch-depth: 2
+            # If this run was triggered by a pull request event, then checkout
+            # the head of the pull request instead of the merge commit.
+            -   run: git checkout HEAD^2
+                if: ${{ github.event_name == 'pull_request' }}
+            -   name: Cache files
+                uses: actions/cache@v2
+                with:
+                    path: |
+                        ~/.sonar
+                    key: ${{ runner.os }}-sonar
+                    restore-keys: ${{ runner.os }}-sonar
+            -   name: Run Analysis
+                uses: codescan-io/codescan-scanner-action
+                with:
+                    login: ${{ secrets.CODESCAN_AUTH_TOKEN }}
+                    organization: 5efa11fdda6b0c001320f461
+                    projectKey: ci1
+                    codeScanUrl: https://test.codescan.io
+                    generateSarifFile: true
+                    args: |
+                        sonar.verbose=true
+            -   name: Upload SARIF file
+                uses: github/codeql-action/upload-sarif@v1
+                with:
+                    sarif_file: codescan.sarif
